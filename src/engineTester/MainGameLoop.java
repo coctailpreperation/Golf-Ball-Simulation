@@ -4,7 +4,6 @@ import Models.TexturedModel;
 import Textures.ModelTexture;
 import Textures.TerrainTexture;
 import Textures.TerrainTexturePack;
-import engineTester.audio.Audio;
 import entities.*;
 import objConverter.ModelData;
 import objConverter.OBJFileLoader;
@@ -26,25 +25,6 @@ public class MainGameLoop {
 
         DisplayManager.createDisplay();
         Loader loader = new Loader();
-
-
-
-
-
-
-
-        //OpenGL expect Vertices to be defined counter clockwise by default
-
-
-      /*  ModelData wheelData = OBJFileLoader.loadOBJ( "/res/ball");
-        RawModel rawWheelData = loader.loadToVAO(wheelData.getVertices(),wheelData.getTextureCoords(),wheelData.getNormals(),wheelData.getIndices());
-        TexturedModel wheelModel= new TexturedModel(rawWheelData,new ModelTexture(loader.loadTexture("/res/ball")).setHasTransparency(false).setShineDamper(100).setReflectivity(1));
-        MovingObject[] wheel = new MovingObject[4];
-        wheel[0] = new MovingObject(wheelModel,new Vector3f(3.92543f+30,1.74258f,-6.46595f+30),1.1f,0,0,0); //backLeftWheel
-        wheel[1] = new MovingObject(wheelModel,new Vector3f(-3.92543f+30,1.74258f,-6.46595f+30),1.1f,0,180,0); //backRight
-        wheel[2] = new MovingObject(wheelModel,new Vector3f(3.88814f+30,1.74258f,7.66162f+30),1.1f,0,0,0); //frontLeft
-        wheel[3] = new MovingObject(wheelModel,new Vector3f(-3.89323f+30,1.74258f,7.28157f+30),1.1f,0,180,0);//frontRight
-       */
 
         ModelData bodyData = OBJFileLoader.loadOBJ( "/ball");
         RawModel bodyRawModel = loader.loadToVAO(bodyData.getVertices(),bodyData.getTextureCoords(),bodyData.getNormals(),bodyData.getIndices());
