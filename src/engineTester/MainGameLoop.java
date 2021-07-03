@@ -120,13 +120,13 @@ public class MainGameLoop {
 
             camera.move();
 
-           golfBall.move();
+            golfBall.move();
 
 
 
             for(Terrain terrain : terrains)
                 renderer.processTerrain(terrain);
-        //    renderer.processTerrain(terrain1);
+
             renderer.processEntity(golfBall);
             for(Entity grassObject:grass){
                 renderer.processEntity(grassObject);

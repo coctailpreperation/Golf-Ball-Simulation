@@ -43,7 +43,7 @@ public class Player extends Entity {
     Vector3f fHit = new Vector3f(0, 0, 0);
     Vector3f v = new Vector3f(0, 0, 0);
     float ballM = 0.04593f; // Ball Weight
-    float clubM; // Club Weight
+    //float clubM; // Club Weight
     Vector3f fShot = new Vector3f(0,0,0); // Newton
     boolean isShot = false;
     Vector3f vW = new Vector3f(0, 0, 2.7f); //10 km/h = 2.7 m/s //Wind Speed
@@ -57,24 +57,26 @@ public class Player extends Entity {
     float currentTime,previousTime = 0;
     float p = 0.8f;
     Vector3f currentForce = new Vector3f(0,0,0);
+    Vector3f previousShot = new Vector3f(0,0,0);
+    boolean isBouncing = false;
 
     public void move() {
         checkInputs();
         //   super.increaseRotation(0, 0.01f*currentSpeed*currentTurnSpeed * DisplayManager.getFrameTimeSeconds(), 0);//FrontWheels
-
+        if (isInTheAir) {
+            fGravity.y = 10;
+        }
 
         dt = 0.01f;
 
-        currentTime = Sys.getTime()*10f/Sys.getTimerResolution();
+        currentTime = Sys.getTime()*1.0f/Sys.getTimerResolution();
 
 
-        fTotal.y = (float) (fShot.y * Math.sin(Math.toRadians(hitAngle))) - fGravity.y;
-        fTotal.z = (float) (fShot.z * Math.cos(Math.toRadians(hitAngle)));
+        fTotal.y = fShot.y - fGravity.y;
+        fTotal.z = fShot.z;
 
-        if(isShot){
-            fShot.y = 0;
-            fShot.z = 0;
-        }
+        fShot.y = 0;
+        fShot.z = 0;
 
         a.y = fTotal.y / ballM;
         a.z = fTotal.z / ballM;
@@ -82,7 +84,7 @@ public class Player extends Entity {
         v.y += a.y * dt;
         v.z += a.z * dt;
 
-        System.out.println(v.z);
+        //System.out.println(v.z);
 
 
         float dy = 0.1f * v.y * dt;
@@ -91,15 +93,19 @@ public class Player extends Entity {
         super.increasePosition(0, dy, dz);
         super.increaseRotation(0.5f,0,0);
 
-        if(super.getPosition().getY() < TERRAIN_HEIGHT + basePosition.y){
-            fGravity.y = 0;
-            super.getPosition().y = TERRAIN_HEIGHT + basePosition.y;
-            isInTheAir = false;
+        if(super.getPosition().y < TERRAIN_HEIGHT + basePosition.y){
 
+            super.getPosition().y = TERRAIN_HEIGHT + basePosition.y;
+            fShot.y = previousShot.y * p;
+            previousShot.y = fShot.y;
+            //System.out.println(fShot.y);
+            if(fShot.y < 10) {
+                fGravity.y = 0;
+                isInTheAir = false;
+            }
+            else isInTheAir = true;
         }
-        if (isInTheAir) {
-            fGravity.y = 10;
-        }
+
     }
 
 
@@ -108,8 +114,8 @@ public class Player extends Entity {
             System.out.println("SHOT");
             isInTheAir = true;
             isShot = true;
-            fShot.y = 5000;
-            fShot.z = 5000;
+            previousShot.y = fShot.y = (float) (5000 * Math.cos(Math.toRadians(hitAngle)));
+            previousShot.z = fShot.z = (float) (5000 * Math.sin(Math.toRadians(hitAngle)));
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime-previousTime) > 1) {
             increaseAngle();
@@ -118,6 +124,23 @@ public class Player extends Entity {
         if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && (currentTime-previousTime) > 1) {
             decreaseAngle();
         }
+        if(Keyboard.isKeyDown(Keyboard.KEY_R) && (currentTime-previousTime) > 1){
+            reset();
+        }
+    }
+    private void reset(){
+        previousTime = currentTime;
+        super.getPosition().y = basePosition.y;
+        super.getPosition().x = basePosition.x;
+        super.getPosition().z = basePosition.z;
+        fTotal.y = 0;
+        fTotal.z = 0;
+        isShot = false;
+        v.y = 0;
+        v.z = 0;
+        a.y = 0;
+        a.z = 0;
+        fGravity.y = 0;
     }
     private void increaseAngle(){
         hitAngle+= 5;
