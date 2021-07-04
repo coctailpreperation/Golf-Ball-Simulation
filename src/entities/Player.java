@@ -52,7 +52,7 @@ public class Player extends Entity {
     Vector3f a = new Vector3f(0,0,0);
     float dt = 0;
     float launchDelta1 = 30;
-    float launchDelta2 = Camera.angleAroundPlayer;
+    float launchDelta2 = 0;
     float currentTime,previousTime = 0;
     float p = 0.5f;
     Vector3f currentForce = new Vector3f(0,0,0);
@@ -69,8 +69,9 @@ public class Player extends Entity {
 
     public void move() {
         //Camera.angleAroundPlayer = 90;
-        if(v.x ==0 && v.y==0 && v.z ==0)
-        launchDelta2 = Camera.angleAroundPlayer - 90;
+        if(v.x ==0 && v.y==0 && v.z ==0) {
+           launchDelta2 = Camera.angleAroundPlayer - 90;
+        }
 
         System.out.println(launchDelta2);
         checkInputs();
@@ -83,11 +84,11 @@ public class Player extends Entity {
         currentTime = Sys.getTime()*1.0f/Sys.getTimerResolution();
 
         FD.x = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.x, 2))
-                * Math.cos(Math.toRadians(delta1)) * Math.sin(Math.toRadians(launchDelta2)));
+                * Math.cos(Math.toRadians(delta1)));
         FD.y = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.y, 2))
                 * Math.sin(Math.toRadians(delta1)));
         FD.z = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.z, 2))
-                * Math.cos(Math.toRadians(delta1)) * Math.cos(Math.toRadians(launchDelta2)));
+                * Math.cos(Math.toRadians(delta1)));
 
         if(!isInTheAir) {
             int x = 1;
@@ -143,8 +144,9 @@ public class Player extends Entity {
         float tanAngle = (getPosition().y + basePosition.y) / distance(getPosition().x + basePosition.x, getPosition().z + basePosition.z);
         delta1 = (float) Math.toDegrees(Math.atan(tanAngle));
 
-        float tanAngle1 = (getPosition().x + basePosition.y) / getPosition().z + basePosition.z;
-        delta2 = (float) Math.toRadians(Math.atan(tanAngle1));
+        float tanAngle1 = (getPosition().x + basePosition.x) / getPosition().z + basePosition.z;
+        delta2 = (float) Math.toDegrees(Math.atan(tanAngle1));
+        System.out.println(delta2);
 
 
 
