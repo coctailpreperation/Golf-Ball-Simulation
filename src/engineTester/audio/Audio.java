@@ -14,31 +14,11 @@ public class Audio {
         tracks[0] = AudioMaster.loadSound("engineTester/audio/backgroundmusic.wav");
         tracks[1] = AudioMaster.loadSound("engineTester/audio/ballhit.wav");
 
-
         for(int i=0;i<2;i++)
             sources[i] = new Source();
         sources[0].setLooping(true);
         sources[1].setLooping(false);
     }
-
-  /*  public static boolean isPlaying(int i){
-        switch (i) {
-            case 1: {
-                source.play(x);
-                break;
-            }
-            case 2:{
-                source1.play(y);
-                break;
-            }
-            case 3:{
-                source2.play(z);
-                break;
-            }
-        }
-    }
-
-   */
 
     public static void play(State state){
         int i = state.ordinal();

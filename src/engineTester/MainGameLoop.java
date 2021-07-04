@@ -31,7 +31,7 @@ public class MainGameLoop {
         ModelData bodyData = OBJFileLoader.loadOBJ( "/ball");
         RawModel bodyRawModel = loader.loadToVAO(bodyData.getVertices(),bodyData.getTextureCoords(),bodyData.getNormals(),bodyData.getIndices());
         TexturedModel bodyModel= new TexturedModel(bodyRawModel,new ModelTexture(loader.loadTexture("/ball")).setHasTransparency(false).setShineDamper(100).setReflectivity(1));
-        Player golfBall = new Player(bodyModel,new Vector3f(30,1,30),1,0,0,0);
+        Player golfBall = new Player(bodyModel,new Vector3f(300,1,300),1,0,0,0);
 
 
 

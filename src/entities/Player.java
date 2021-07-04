@@ -40,9 +40,7 @@ public class Player extends Entity {
     float launchDelta2 = 0;
     float currentTime,previousTime = 0;
     float p = 0.5f;
-    Vector3f currentForce = new Vector3f(0,0,0);
     Vector3f previousShot = new Vector3f(0,0,0);
-    boolean isBouncing = false;
     float delta1 = 0;
     Vector3f FD = new Vector3f(0,0,0);
     float kFriction = 0.4f;
@@ -67,21 +65,23 @@ public class Player extends Entity {
         dt = 0.01f;
 
         currentTime = Sys.getTime()*1.0f/Sys.getTimerResolution();
-        int t = 1;
-        if(Math.cos(Math.toRadians(launchDelta2)) < 0)
-            t = -1;
-        FD.x = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.x, 2) * t)
-                * Math.cos(Math.toRadians(delta1)));
-        FD.y = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.y, 2))
-                * Math.sin(Math.toRadians(delta1)));
-        FD.z = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.z, 2) * t)
-                * Math.cos(Math.toRadians(delta1)));
+
+        //int t = 1;
+       // if(Math.sin(Math.toRadians(launchDelta2)) < 0)
+        //    t = -1;
+       // int q = 1;
+       // if(Math.cos(Math.toRadians(launchDelta2)) < 0)
+        //    q = -1;
+        FD.x = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.x, 2)));
+        //* Math.sin(Math.toRadians(launchDelta2))
+        FD.y = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.y, 2)));
+        FD.z = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.z, 2)));
+        //* Math.cos(Math.toRadians(launchDelta2))
+
 
         if(!isInTheAir) {
-            int x = 1;
-            if(Math.cos(Math.toRadians(launchDelta2)) < 0)
-                x = -1;
-            fFriction.z = (float) (ballM * 10 * kFriction * Math.cos(Math.toRadians(delta1)) * x);
+
+            fFriction.z = (float) (ballM * 10 * kFriction);
 
             if(Math.abs(v.z) - Math.abs(fFriction.z) < 0) {
                 v.z = 0;
@@ -93,10 +93,8 @@ public class Player extends Entity {
 
 
         if(!isInTheAir){
-            int x = 1;
-            if(Math.sin(Math.toRadians(launchDelta2)) < 0)
-                x = -1;
-            fFriction.x = (float) (ballM * 10 * kFriction * Math.cos(Math.toRadians(delta1)) * x);
+
+            fFriction.x = (float) (ballM * 10 * kFriction);
 
             if(Math.abs(v.x) - Math.abs(fFriction.x) < 0) {
                 v.x = 0;
@@ -106,10 +104,12 @@ public class Player extends Entity {
 
         }
         else fFriction.x = 0;
+      //  FD.x = 0;
+      //  FD.z = 0;
 
-        fTotal.x = (float) (fShot.x * Math.cos(Math.toRadians(launchDelta1)) * Math.sin(Math.toRadians(launchDelta2)) - FD.x - fFriction.x);
-        fTotal.y = (float) (fShot.y * Math.sin(Math.toRadians(launchDelta1)) - fGravity.y - FD.y);
-        fTotal.z = (float) (fShot.z * Math.cos(Math.toRadians(launchDelta1)) * Math.cos(Math.toRadians(launchDelta2)) - FD.z - fFriction.z);
+        fTotal.x = (float) (fShot.x  - FD.x - fFriction.x);
+        fTotal.y = (float) (fShot.y - fGravity.y - FD.y);
+        fTotal.z = (float) (fShot.z  - FD.z - fFriction.z);
 
         fShot.x = 0;
         fShot.y = 0;
@@ -124,9 +124,9 @@ public class Player extends Entity {
         v.z += a.z * dt;
 
 
-        float dx =  v.x * dt;
-        float dy =  v.y * dt;
-        float dz =  v.z * dt;
+        float dx = (float) (v.x * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.sin(Math.toRadians(launchDelta2)));
+        float dy = (float) (v.y * dt * Math.sin(Math.toRadians(launchDelta1)));
+        float dz = (float) (v.z * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.cos(Math.toRadians(launchDelta2)));
 
         float tanAngle = (getPosition().y + basePosition.y) / distance(getPosition().x + basePosition.x, getPosition().z + basePosition.z);
         delta1 = (float) Math.toDegrees(Math.atan(tanAngle));
@@ -167,9 +167,9 @@ public class Player extends Entity {
             Audio.play(State.ballhit);
             if(launchDelta1 != 0)
             isInTheAir = true;
-            previousShot.x = fShot.x = 8000;
-            previousShot.y = fShot.y = 8000;
-            previousShot.z = fShot.z = 8000;
+            previousShot.x = fShot.x = 2000;
+            previousShot.y = fShot.y = 2000;
+            previousShot.z = fShot.z = 2000;
 
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime-previousTime) > 0.5) {
