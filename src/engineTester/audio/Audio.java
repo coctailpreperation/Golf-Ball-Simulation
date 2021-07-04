@@ -3,38 +3,22 @@ package engineTester.audio;
 public class Audio {
 
 
-    private static Source[] sources = new Source[12];
-    private static int [] tracks = new int[12];
+    private static Source[] sources = new Source[2];
+    private static int [] tracks = new int[2];
 
     public static void run(){
 
         AudioMaster.init();
 
         AudioMaster.setListenerData(0,0,0);
-        tracks[0] = AudioMaster.loadSound("engineTester/audio/start.wav");
-        tracks[1] = AudioMaster.loadSound("engineTester/audio/standby.wav");
-        tracks[2] = AudioMaster.loadSound("engineTester/audio/reverse.wav");
+        tracks[0] = AudioMaster.loadSound("engineTester/audio/backgroundmusic.wav");
+        tracks[1] = AudioMaster.loadSound("engineTester/audio/ballhit.wav");
 
 
-        tracks[3] = AudioMaster.loadSound("engineTester/audio/first.wav");
-        tracks[4] = AudioMaster.loadSound("engineTester/audio/firstrolling.wav");
-
-
-        tracks[6] = AudioMaster.loadSound("engineTester/audio/second.wav");
-        tracks[7] = AudioMaster.loadSound("engineTester/audio/secondrolling.wav");
-
-        tracks[9] = AudioMaster.loadSound("engineTester/audio/third.wav");
-
-        for(int i=0;i<12;i++)
+        for(int i=0;i<2;i++)
             sources[i] = new Source();
-
-
-        // source1 standby
-        // source0 start
-        // source2 first
-        // source3 firststandby
-
-        sources[1].setLooping(true);
+        sources[0].setLooping(true);
+        sources[1].setLooping(false);
     }
 
   /*  public static boolean isPlaying(int i){

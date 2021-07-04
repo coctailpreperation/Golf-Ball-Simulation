@@ -4,6 +4,8 @@ import Models.TexturedModel;
 import Textures.ModelTexture;
 import Textures.TerrainTexture;
 import Textures.TerrainTexturePack;
+import engineTester.audio.Audio;
+import engineTester.audio.State;
 import entities.*;
 import objConverter.ModelData;
 import objConverter.OBJFileLoader;
@@ -21,7 +23,7 @@ import java.util.Random;
 public class MainGameLoop {
     public static void main(String[] args){
 
-        /************/
+        Audio.run();
 
         DisplayManager.createDisplay();
         Loader loader = new Loader();
@@ -68,7 +70,7 @@ public class MainGameLoop {
 
        /*TerrainTexture Stuff*/
 
-        TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("/terrain/ra"));
+        TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
         TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("/terrain/dirt"));
         TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("/terrain/mud"));
         TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("/terrain/path"));
@@ -80,8 +82,6 @@ public class MainGameLoop {
 
         ArrayList<Terrain> terrains = new ArrayList<>();
 
-        //Terrain terrain = new Terrain(0,0,loader,texturePack,blendMap,"/terrain/heightMap");
-        //Terrain terrain1 = new Terrain(-1,-1,loader,texturePack,blendMap,"/terrain/heightMap");
         for(int i = 0 ; i < 5 ; i ++){
             Terrain terrain = new Terrain(0,i,loader,texturePack,blendMap,"/terrain/heightMap");
             terrains.add(terrain);
@@ -92,7 +92,7 @@ public class MainGameLoop {
 
         MasterRenderer renderer = new MasterRenderer();
 
-
+        Audio.play(State.background);
 
 
         while(!Display.isCloseRequested()){
@@ -123,6 +123,7 @@ public class MainGameLoop {
             renderer.render(light,camera);
             DisplayManager.updateDisplay();
         }
+        Audio.cleanUp();
         renderer.cleanUP();
         loader.cleanUP();
         DisplayManager.closeDisplay();

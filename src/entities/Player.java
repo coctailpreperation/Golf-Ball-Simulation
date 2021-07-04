@@ -1,6 +1,8 @@
 package entities;
 
 import Models.TexturedModel;
+import engineTester.audio.Audio;
+import engineTester.audio.State;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
@@ -49,21 +51,29 @@ public class Player extends Entity {
     Vector3f v0 = new Vector3f(0,0,0);
     Vector3f a = new Vector3f(0,0,0);
     float dt = 0;
-    float delta1 = 30;
-    float delta2 = 0;
+    float launchDelta1 = 30;
+    float launchDelta2 = Camera.angleAroundPlayer;
     float currentTime,previousTime = 0;
     float p = 0.5f;
     Vector3f currentForce = new Vector3f(0,0,0);
     Vector3f previousShot = new Vector3f(0,0,0);
     boolean isBouncing = false;
-    float angle = 0;
+    float delta1 = 0;
     Vector3f FD = new Vector3f(0,0,0);
     float kFriction = 0.4f;
     Vector3f fFriction = new Vector3f(0,0,0);
+    float delta2 = 0;
+    float distance(float x,float z){
+        return (float) Math.sqrt(Math.pow(z,2) + Math.pow(x,2));
+    }
 
     public void move() {
+        //Camera.angleAroundPlayer = 90;
+        if(v.x ==0 && v.y==0 && v.z ==0)
+        launchDelta2 = Camera.angleAroundPlayer - 90;
+
+        System.out.println(launchDelta2);
         checkInputs();
-        //   super.increaseRotation(0, 0.01f*currentSpeed*currentTurnSpeed * DisplayManager.getFrameTimeSeconds(), 0);//FrontWheels
         if (isInTheAir) {
             fGravity.y = 10;
         }
@@ -72,53 +82,87 @@ public class Player extends Entity {
 
         currentTime = Sys.getTime()*1.0f/Sys.getTimerResolution();
 
+        FD.x = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.x, 2))
+                * Math.cos(Math.toRadians(delta1)) * Math.sin(Math.toRadians(launchDelta2)));
+        FD.y = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.y, 2))
+                * Math.sin(Math.toRadians(delta1)));
+        FD.z = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.z, 2))
+                * Math.cos(Math.toRadians(delta1)) * Math.cos(Math.toRadians(launchDelta2)));
 
-        FD.y = (float) ((0.1 * 0.001f * Math.PI * 1.184f * Math.pow(v.y, 2)) * Math.sin(Math.toRadians(angle)));
-        FD.z = (float) ((0.1 * 0.001f * Math.PI * 1.184f * Math.pow(v.z, 2)) * Math.cos(Math.toRadians(angle)));
-        System.out.println(FD.z);
+        if(!isInTheAir) {
+            int x = 1;
+            if(Math.cos(Math.toRadians(launchDelta2)) < 0)
+                x = -1;
+            fFriction.z = (float) (ballM * 10 * kFriction * Math.cos(Math.toRadians(delta1)) * x);
 
-        if(!isInTheAir && v.z > 0)
-            fFriction.z = ballM * 10 * kFriction;
+            if(Math.abs(v.z) - Math.abs(fFriction.z) < 0) {
+                v.z = 0;
+                fFriction.z = 0;
+            }
+
+        }
         else fFriction.z = 0;
 
-        fTotal.y = (float) (fShot.y * Math.sin(Math.toRadians(delta1)) - fGravity.y - FD.y);
-        fTotal.z = (float) (fShot.z * Math.cos(Math.toRadians(delta1)) - FD.z - fFriction.z);
 
+        if(!isInTheAir){
+            int x = 1;
+            if(Math.sin(Math.toRadians(launchDelta2)) < 0)
+                x = -1;
+            fFriction.x = (float) (ballM * 10 * kFriction * Math.cos(Math.toRadians(delta1)) * x);
+
+            if(Math.abs(v.x) - Math.abs(fFriction.x) < 0) {
+                v.x = 0;
+                fFriction.x = 0;
+            }
+
+
+        }
+        else fFriction.x = 0;
+
+        fTotal.x = (float) (fShot.x * Math.cos(Math.toRadians(launchDelta1)) * Math.sin(Math.toRadians(launchDelta2)) - FD.x - fFriction.x);
+        fTotal.y = (float) (fShot.y * Math.sin(Math.toRadians(launchDelta1)) - fGravity.y - FD.y);
+        fTotal.z = (float) (fShot.z * Math.cos(Math.toRadians(launchDelta1)) * Math.cos(Math.toRadians(launchDelta2)) - FD.z - fFriction.z);
+
+        fShot.x = 0;
         fShot.y = 0;
         fShot.z = 0;
 
+        a.x = fTotal.x / ballM;
         a.y = fTotal.y / ballM;
         a.z = fTotal.z / ballM;
 
+        v.x += a.x * dt;
         v.y += a.y * dt;
         v.z += a.z * dt;
 
-        //System.out.println(v.z);
+
+        float dx =  v.x * dt;
+        float dy =  v.y * dt;
+        float dz =  v.z * dt;
+
+        float tanAngle = (getPosition().y + basePosition.y) / distance(getPosition().x + basePosition.x, getPosition().z + basePosition.z);
+        delta1 = (float) Math.toDegrees(Math.atan(tanAngle));
+
+        float tanAngle1 = (getPosition().x + basePosition.y) / getPosition().z + basePosition.z;
+        delta2 = (float) Math.toRadians(Math.atan(tanAngle1));
 
 
-        float dy = 1f * v.y * dt;
-        float dz = 1f * v.z * dt;
-        float x = 300f / 400f;
-        float tanAngle = (getPosition().y + basePosition.y) / (getPosition().z + basePosition.z);
-        angle = (float) Math.toDegrees(Math.atan(tanAngle));
 
-
-
-        super.increasePosition(0, dy, dz);
+        super.increasePosition(dx, dy, dz);
         super.increaseRotation(0.5f,0,0);
 
         if(super.getPosition().y < TERRAIN_HEIGHT + basePosition.y){
 
             super.getPosition().y = TERRAIN_HEIGHT + basePosition.y;
-         //   isInTheAir = false;
+
             fGravity.y = 0;
             v.y = 0;
             fShot.y = 0;
-          //  hitAngle = 0;
             fShot.y = previousShot.y * p;
             previousShot.y = fShot.y;
-            //System.out.println(fShot.y);
+
             if(fShot.y < 10) {
+                isShot = false;
                 fShot.y = 0;
                 previousShot.y = 0;
                 fGravity.y = 0;
@@ -131,20 +175,28 @@ public class Player extends Entity {
 
 
     private void checkInputs() {
-        if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && !isShot){
-            System.out.println("SHOT");
+        if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && v.x == 0 && v.z ==0){
+            Audio.play(State.ballhit);
+            if(launchDelta1 != 0)
             isInTheAir = true;
             isShot = true;
+            previousShot.x = fShot.x = 2000;
             previousShot.y = fShot.y = 2000;
             previousShot.z = fShot.z = 2000;
-        }
-        if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime-previousTime) > 1) {
-            increaseAngle();
 
         }
-        if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && (currentTime-previousTime) > 1) {
-            decreaseAngle();
+        if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime-previousTime) > 0.5) {
+            increaseDelta1();
+
         }
+        if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && (currentTime-previousTime) > 0.5) {
+            decreaseDelta1();
+        }
+        if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && (currentTime-previousTime) > 0.5)
+            increaseDelta2();
+        if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && (currentTime-previousTime) > 0.5)
+            decreaseDelta2();
+
         if(Keyboard.isKeyDown(Keyboard.KEY_R) && (currentTime-previousTime) > 1){
             reset();
         }
@@ -157,20 +209,32 @@ public class Player extends Entity {
         fTotal.y = 0;
         fTotal.z = 0;
         isShot = false;
+        v.x = 0;
         v.y = 0;
         v.z = 0;
+        a.x = 0;
         a.y = 0;
         a.z = 0;
         fGravity.y = 0;
     }
-    private void increaseAngle(){
-        delta1 += 5;
-        System.out.println(delta1);
+    private void increaseDelta1(){
+        launchDelta1 += 5;
+        System.out.println("Delta 1 = " + launchDelta1);
         previousTime = currentTime;
     }
-    private void decreaseAngle(){
-        delta1 -= 5;
-        System.out.println(delta1);
+    private void decreaseDelta1(){
+        launchDelta1 -= 5;
+        System.out.println("Delta 1 = " + launchDelta1);
+        previousTime = currentTime;
+    }
+    private void increaseDelta2(){
+        launchDelta2 +=5;
+        System.out.println("Delta 2 = " + launchDelta2);
+        previousTime = currentTime;
+    }
+    private void decreaseDelta2(){
+        launchDelta2 -=5;
+        System.out.println("Delta 2 = " + launchDelta2);
         previousTime = currentTime;
     }
 
