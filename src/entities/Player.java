@@ -9,21 +9,12 @@ import org.lwjgl.util.vector.Vector3f;
 
 public class Player extends Entity {
 
-    public float getCurrentSpeed() {
-        return currentSpeed;
-    }
 
-
-    private static final float RUN_SPEED = 1.5f;
-    private static final float TURN_SPEED = 160;
-    private static final float GRAVITY = -50;
-    private static final float JUMP_POWER = 30;
     private float baseRotY = 0;
     private Vector3f basePosition = new Vector3f(0, 0, 0);
 
     private static final float TERRAIN_HEIGHT = 0;
 
-    private float currentSpeed = 0;
     private float currentTurnSpeed = 0;
     private float upwardsSpeed = 0;
 
@@ -38,17 +29,11 @@ public class Player extends Entity {
     }
 
     Vector3f fTotal = new Vector3f(0, 0, 0); // Total Force
-    Vector3f fHit = new Vector3f(0, 0, 0);
     Vector3f v = new Vector3f(0, 0, 0);
     float ballM = 0.04593f; // Ball Weight
     //float clubM; // Club Weight
     Vector3f fShot = new Vector3f(0,0,0); // Newton
-    boolean isShot = false;
-    Vector3f vW = new Vector3f(0, 0, 2.7f); //10 km/h = 2.7 m/s //Wind Speed
-    Vector3f fW = new Vector3f(0, 0, 0); // Wind Force = -Cw * Vw
-    float Cw = 0.5f; // Average Air Drag Coefficient ON Golf Ball
     Vector3f fGravity = new Vector3f(0, 0, 0);
-    Vector3f v0 = new Vector3f(0,0,0);
     Vector3f a = new Vector3f(0,0,0);
     float dt = 0;
     float launchDelta1 = 30;
@@ -82,12 +67,14 @@ public class Player extends Entity {
         dt = 0.01f;
 
         currentTime = Sys.getTime()*1.0f/Sys.getTimerResolution();
-
-        FD.x = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.x, 2))
+        int t = 1;
+        if(Math.cos(Math.toRadians(launchDelta2)) < 0)
+            t = -1;
+        FD.x = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.x, 2) * t)
                 * Math.cos(Math.toRadians(delta1)));
         FD.y = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.y, 2))
                 * Math.sin(Math.toRadians(delta1)));
-        FD.z = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.z, 2))
+        FD.z = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.z, 2) * t)
                 * Math.cos(Math.toRadians(delta1)));
 
         if(!isInTheAir) {
@@ -164,7 +151,6 @@ public class Player extends Entity {
             previousShot.y = fShot.y;
 
             if(fShot.y < 10) {
-                isShot = false;
                 fShot.y = 0;
                 previousShot.y = 0;
                 fGravity.y = 0;
@@ -181,10 +167,9 @@ public class Player extends Entity {
             Audio.play(State.ballhit);
             if(launchDelta1 != 0)
             isInTheAir = true;
-            isShot = true;
-            previousShot.x = fShot.x = 2000;
-            previousShot.y = fShot.y = 2000;
-            previousShot.z = fShot.z = 2000;
+            previousShot.x = fShot.x = 8000;
+            previousShot.y = fShot.y = 8000;
+            previousShot.z = fShot.z = 8000;
 
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime-previousTime) > 0.5) {
@@ -210,7 +195,6 @@ public class Player extends Entity {
         super.getPosition().z = basePosition.z;
         fTotal.y = 0;
         fTotal.z = 0;
-        isShot = false;
         v.x = 0;
         v.y = 0;
         v.z = 0;
