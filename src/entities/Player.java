@@ -32,6 +32,7 @@ public class Player extends Entity {
     Vector3f fTotal = new Vector3f(0, 0, 0); // Total Force
     Vector3f v = new Vector3f(0, 0, 0);
     float ballM = 0.04593f; // Ball Weight
+    float ballRadius = 0.2f;
     //float clubM; // Club Weight
     Vector3f fShot = new Vector3f(0,0,0); // Newton
     Vector3f fGravity = new Vector3f(0, 0, 0);
@@ -48,6 +49,7 @@ public class Player extends Entity {
     Vector3f fFriction = new Vector3f(0,0,0);
     float delta2 = 0;
     float dx,dy,dz;
+    Vector3f w = new Vector3f(0,0,0);
     float distance(float x,float z){
         return (float) Math.sqrt(Math.pow(z,2) + Math.pow(x,2));
     }
@@ -125,9 +127,14 @@ public class Player extends Entity {
         v.z += a.z * dt;
 
 
+        System.out.println(v.z);
+
         dx = (float) (v.x * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.sin(Math.toRadians(launchDelta2)));
         dy = (float) (v.y * dt * Math.sin(Math.toRadians(launchDelta1)));
         dz = (float) (v.z * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.cos(Math.toRadians(launchDelta2)));
+
+        w.x = dz / dt * ballRadius;
+        w.z = dx / dt * ballRadius;
 
         float tanAngle = (getPosition().y - basePosition.y) / distance(getPosition().x - basePosition.x, getPosition().z - basePosition.z);
         delta1 = (float) Math.toDegrees(Math.atan(tanAngle));
@@ -141,7 +148,7 @@ public class Player extends Entity {
 
 
         super.increasePosition(dx, dy, dz);
-        super.increaseRotation(0.5f,0,0);
+        super.increaseRotation(w.x,0,w.z);
 
         if(super.getPosition().y < TERRAIN_HEIGHT + basePosition.y){
 
@@ -170,9 +177,9 @@ public class Player extends Entity {
             Audio.play(State.ballhit);
             if(launchDelta1 != 0)
             isInTheAir = true;
-            previousShot.x = fShot.x = 500 / (dt * 100);
-            previousShot.y = fShot.y = 500 / (dt * 100);
-            previousShot.z = fShot.z = 500 / (dt * 100);
+            previousShot.x = fShot.x = 1000 / (dt * 100);
+            previousShot.y = fShot.y = 1000 / (dt * 100);
+            previousShot.z = fShot.z = 1000 / (dt * 100);
           //  String x= JOptionPane.showInputDialog("Enter A Value");
           //  int value=Integer.parseInt(x);
           //  fGravity.y = value;
