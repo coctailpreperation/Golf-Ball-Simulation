@@ -8,8 +8,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
 import renderEngine.DisplayManager;
 
-import javax.swing.*;
-
 public class Player extends Entity {
 
 
@@ -49,7 +47,7 @@ public class Player extends Entity {
     float kFriction = 0.4f;
     Vector3f fFriction = new Vector3f(0,0,0);
     float delta2 = 0;
-    Vector3f v0 = new Vector3f(0,0,0);
+    float dx,dy,dz;
     float distance(float x,float z){
         return (float) Math.sqrt(Math.pow(z,2) + Math.pow(x,2));
     }
@@ -122,14 +120,14 @@ public class Player extends Entity {
         a.y = fTotal.y / ballM;
         a.z = fTotal.z / ballM;
 
-        v.x += a.x * dt + v0.x;
-        v.y += a.y * dt + v0.y;
-        v.z += a.z * dt + v0.z;
+        v.x += a.x * dt;
+        v.y += a.y * dt;
+        v.z += a.z * dt;
 
 
-        float dx = (float) (v.x * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.sin(Math.toRadians(launchDelta2)));
-        float dy = (float) (v.y * dt * Math.sin(Math.toRadians(launchDelta1)));
-        float dz = (float) (v.z * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.cos(Math.toRadians(launchDelta2)));
+        dx = (float) (v.x * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.sin(Math.toRadians(launchDelta2)));
+        dy = (float) (v.y * dt * Math.sin(Math.toRadians(launchDelta1)));
+        dz = (float) (v.z * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.cos(Math.toRadians(launchDelta2)));
 
         float tanAngle = (getPosition().y - basePosition.y) / distance(getPosition().x - basePosition.x, getPosition().z - basePosition.z);
         delta1 = (float) Math.toDegrees(Math.atan(tanAngle));
@@ -209,7 +207,11 @@ public class Player extends Entity {
         a.x = 0;
         a.y = 0;
         a.z = 0;
+        isInTheAir = false;
         fGravity.y = 0;
+        fTotal.x = 0;
+        fTotal.y = 0;
+        fTotal.z = 0;
         fShot.x = 0;
         fShot.y = 0;
         fShot.z = 0;
