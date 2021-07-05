@@ -53,6 +53,7 @@ public class Player extends Entity {
     float fShotValue = 1000;
     float maximumHeight = 0;
     boolean once = true;
+    int score = 0;
 
     public void move() {
 
@@ -67,6 +68,7 @@ public class Player extends Entity {
             if(Math.abs(getPosition().x % 500) <= 10 && Math.abs(getPosition().z % 500) <= 10 && getPosition().y == basePosition.y){
             getPosition().y = -1f;
             finished = true;
+            score++;
         }
 
         else if(!finished){
@@ -137,10 +139,7 @@ public class Player extends Entity {
             a.y = fTotal.y / ballM;
             a.z = fTotal.z / ballM;
 
-                if(a.y < 0 && once) {
-                    maximumHeight = v.y;
-                    once = false;
-                }
+
 
             v.x += a.x * dt;
             v.y += a.y * dt;
@@ -156,6 +155,7 @@ public class Player extends Entity {
             dy = (float) (v.y * dt * Math.sin(Math.toRadians(verticalAngle)));
             dz = (float) (v.z * dt * Math.cos(Math.toRadians(verticalAngle)) * Math.cos(Math.toRadians(horizontalAngle)));
 
+
             w.x = dz / dt * ballRadius;
             w.z = dx / dt * ballRadius;
 
@@ -165,16 +165,23 @@ public class Player extends Entity {
 
             if (super.getPosition().y < TERRAIN_HEIGHT + basePosition.y) {
 
+                System.out.println(verticalAngle);
+                if(verticalAngle < 0 && once) {
+                    verticalAngle += 180;
+                    once = false;
+                }
+                System.out.println(verticalAngle);
 
                 super.getPosition().y = TERRAIN_HEIGHT + basePosition.y;
 
                 fGravity.y = 0;
                 v.y = 0;
                 fShot.y = 0;
+
                 fShot.y = previousShot.y * p;
                 previousShot.y = fShot.y;
 
-                if (fShot.y < 10) {
+                if (fShot.y < 5) {
                     fShot.y = 0;
                     previousShot.y = 0;
                     fGravity.y = 0;
@@ -230,17 +237,25 @@ public class Player extends Entity {
             InputManager.setInputState(InputState.AnglePending);
         }
 
-        if(InputManager.getInputState() == InputState.Gravity)
+        if(InputManager.getInputState() == InputState.Gravity) {
             gravity = InputManager.getValue();
+            InputManager.setInputState(InputState.None);
+        }
 
-        if(InputManager.getInputState() == InputState.Mass)
+        if(InputManager.getInputState() == InputState.Mass) {
             ballM = InputManager.getValue();
+            InputManager.setInputState(InputState.None);
+        }
 
-        if(InputManager.getInputState() == InputState.Force)
+        if(InputManager.getInputState() == InputState.Force) {
             fShotValue = InputManager.getValue();
+            InputManager.setInputState(InputState.None);
+        }
 
-        if(InputManager.getInputState() == InputState.Angle)
+        if(InputManager.getInputState() == InputState.Angle) {
             verticalAngle = InputManager.getValue();
+            InputManager.setInputState(InputState.None);
+        }
 
 
         if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime - previousTime) > 0.5) {
