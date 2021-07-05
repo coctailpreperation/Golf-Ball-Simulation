@@ -6,6 +6,9 @@ import engineTester.audio.State;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
+import renderEngine.DisplayManager;
+
+import javax.swing.*;
 
 public class Player extends Entity {
 
@@ -46,6 +49,7 @@ public class Player extends Entity {
     float kFriction = 0.4f;
     Vector3f fFriction = new Vector3f(0,0,0);
     float delta2 = 0;
+    Vector3f v0 = new Vector3f(0,0,0);
     float distance(float x,float z){
         return (float) Math.sqrt(Math.pow(z,2) + Math.pow(x,2));
     }
@@ -56,13 +60,13 @@ public class Player extends Entity {
            launchDelta2 = Camera.angleAroundPlayer - 90;
         }
 
-        System.out.println(launchDelta2);
+       // System.out.println(launchDelta2);
         checkInputs();
         if (isInTheAir) {
             fGravity.y = 10;
         }
 
-        dt = 0.01f;
+        dt = 0.04f;
 
         currentTime = Sys.getTime()*1.0f/Sys.getTimerResolution();
 
@@ -72,18 +76,17 @@ public class Player extends Entity {
        // int q = 1;
        // if(Math.cos(Math.toRadians(launchDelta2)) < 0)
         //    q = -1;
-        FD.x = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.x, 2)));
+        FD.x = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.x, 2)));
         //* Math.sin(Math.toRadians(launchDelta2))
-        FD.y = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.y, 2)));
-        FD.z = (float) ((0.5 * 0.47 * 0.001338 * 1.184f * Math.pow(v.z, 2)));
+        FD.y = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.y, 2)));
+        FD.z = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.z, 2)));
         //* Math.cos(Math.toRadians(launchDelta2))
 
 
         if(!isInTheAir) {
+            fFriction.z = ballM * 10 * kFriction;
 
-            fFriction.z = (float) (ballM * 10 * kFriction);
-
-            if(Math.abs(v.z) - Math.abs(fFriction.z) < 0) {
+            if(Math.abs(v.z) - Math.abs(a.z) < 0) {
                 v.z = 0;
                 fFriction.z = 0;
             }
@@ -96,7 +99,7 @@ public class Player extends Entity {
 
             fFriction.x = (float) (ballM * 10 * kFriction);
 
-            if(Math.abs(v.x) - Math.abs(fFriction.x) < 0) {
+            if(Math.abs(v.x) - Math.abs(a.z) < 0) {
                 v.x = 0;
                 fFriction.x = 0;
             }
@@ -107,9 +110,9 @@ public class Player extends Entity {
       //  FD.x = 0;
       //  FD.z = 0;
 
-        fTotal.x = (float) (fShot.x  - FD.x - fFriction.x);
-        fTotal.y = (float) (fShot.y - fGravity.y - FD.y);
-        fTotal.z = (float) (fShot.z  - FD.z - fFriction.z);
+        fTotal.x = fShot.x - FD.x - fFriction.x;
+        fTotal.y = fShot.y - ballM * fGravity.y - FD.y;
+        fTotal.z = fShot.z - FD.z - fFriction.z;
 
         fShot.x = 0;
         fShot.y = 0;
@@ -119,21 +122,23 @@ public class Player extends Entity {
         a.y = fTotal.y / ballM;
         a.z = fTotal.z / ballM;
 
-        v.x += a.x * dt;
-        v.y += a.y * dt;
-        v.z += a.z * dt;
+        v.x += a.x * dt + v0.x;
+        v.y += a.y * dt + v0.y;
+        v.z += a.z * dt + v0.z;
 
 
         float dx = (float) (v.x * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.sin(Math.toRadians(launchDelta2)));
         float dy = (float) (v.y * dt * Math.sin(Math.toRadians(launchDelta1)));
         float dz = (float) (v.z * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.cos(Math.toRadians(launchDelta2)));
 
-        float tanAngle = (getPosition().y + basePosition.y) / distance(getPosition().x + basePosition.x, getPosition().z + basePosition.z);
+        float tanAngle = (getPosition().y - basePosition.y) / distance(getPosition().x - basePosition.x, getPosition().z - basePosition.z);
         delta1 = (float) Math.toDegrees(Math.atan(tanAngle));
 
-        float tanAngle1 = (getPosition().x + basePosition.x) / getPosition().z + basePosition.z;
+        System.out.println(delta1);
+
+        float tanAngle1 = (getPosition().x - basePosition.x) / getPosition().z - basePosition.z;
         delta2 = (float) Math.toDegrees(Math.atan(tanAngle1));
-        System.out.println(delta2);
+
 
 
 
@@ -167,9 +172,12 @@ public class Player extends Entity {
             Audio.play(State.ballhit);
             if(launchDelta1 != 0)
             isInTheAir = true;
-            previousShot.x = fShot.x = 2000;
-            previousShot.y = fShot.y = 2000;
-            previousShot.z = fShot.z = 2000;
+            previousShot.x = fShot.x = 500 / (dt * 100);
+            previousShot.y = fShot.y = 500 / (dt * 100);
+            previousShot.z = fShot.z = 500 / (dt * 100);
+          //  String x= JOptionPane.showInputDialog("Enter A Value");
+          //  int value=Integer.parseInt(x);
+          //  fGravity.y = value;
 
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime-previousTime) > 0.5) {
@@ -202,6 +210,15 @@ public class Player extends Entity {
         a.y = 0;
         a.z = 0;
         fGravity.y = 0;
+        fShot.x = 0;
+        fShot.y = 0;
+        fShot.z = 0;
+        FD.x = 0;
+        FD.y = 0;
+        FD.z = 0;
+        fFriction.x = 0;
+        fFriction.y = 0;
+        fFriction.z = 0;
     }
     private void increaseDelta1(){
         launchDelta1 += 5;

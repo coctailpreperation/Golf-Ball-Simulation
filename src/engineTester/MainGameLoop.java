@@ -7,6 +7,8 @@ import Textures.TerrainTexturePack;
 import engineTester.audio.Audio;
 import engineTester.audio.State;
 import entities.*;
+import guis.GuiRenderer;
+import guis.GuiTexture;
 import objConverter.ModelData;
 import objConverter.OBJFileLoader;
 import org.lwjgl.opengl.Display;
@@ -17,13 +19,17 @@ import Models.RawModel;
 import renderEngine.MasterRenderer;
 import terrains.Terrain;
 
+
+import javax.swing.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MainGameLoop {
     public static void main(String[] args){
 
         Audio.run();
+
 
         DisplayManager.createDisplay();
         Loader loader = new Loader();
@@ -50,25 +56,25 @@ public class MainGameLoop {
         grassTexturedModel.getTexture().setHasTransparency(true);
         grassTexturedModel.getTexture().setHasFakeLighting(true);
         fernTexturedModel.getTexture().setHasTransparency(true);
-        Entity[] fern = new Entity[1000];
-        Entity[] grass = new Entity[2000];
+       // Entity[] fern = new Entity[1000];
+  //      Entity[] grass = new Entity[2000];
         Entity[] lowPolyTree = new Entity[100];
         Random random = new Random();
-        for(int i=0;i<2000;i++){
-            grass[i] = new Entity(grassTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),1,0,0,0);
+   //     for(int i=0;i<2000;i++){
+   //         grass[i] = new Entity(grassTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),1,0,0,0);
 
-        }
+   //     }
         for(int i=0;i<100;i++) {
             lowPolyTree[i] = new Entity(lowPolyTreeTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),0.5f,0,0,0);
         }
 
-        for(int i=0;i<1000;i++){
-            fern[i] = new Entity(fernTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),1,0,0,0);
-        }
+  //      for(int i=0;i<1000;i++){
+   //         fern[i] = new Entity(fernTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),1,0,0,0);
+   //     }
 
         Light light = new Light(new Vector3f(0,2000,0), new Vector3f(1,1,1));
 
-       /*TerrainTexture Stuff*/
+
 
         TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
         TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("/terrain/dirt"));
@@ -78,13 +84,13 @@ public class MainGameLoop {
 
         TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("/terrain/blendMap"));
 
-        //*****************************//
-
         ArrayList<Terrain> terrains = new ArrayList<>();
 
-        for(int i = 0 ; i < 5 ; i ++){
-            Terrain terrain = new Terrain(0,i,loader,texturePack,blendMap,"/terrain/heightMap");
-            terrains.add(terrain);
+       // for(int j = 0 ; j < 2 ; j++)
+        for(int i = -2 ; i < 1 ; i ++){
+
+    Terrain terrain1 = new Terrain(i,0,loader,texturePack,blendMap,"/terrain/heightMap");
+                terrains.add(terrain1);
         }
 
 
@@ -94,6 +100,10 @@ public class MainGameLoop {
 
         Audio.play(State.background);
 
+        GuiRenderer guiRenderer = new GuiRenderer(loader);
+        List<GuiTexture> guis = new ArrayList<>();
+       // GuiTexture guiTexture = new GuiTexture(loader.loadTexture("ball"), new Vector2f(0.5f,0.5f),new Vector2f(0.25f,0.25f));
+      //  guis.add(guiTexture);
 
         while(!Display.isCloseRequested()){
 
@@ -108,21 +118,22 @@ public class MainGameLoop {
                 renderer.processTerrain(terrain);
 
             renderer.processEntity(golfBall);
-            for(Entity grassObject:grass){
-                renderer.processEntity(grassObject);
-            }
-           for(Entity fernObject:fern){
-                renderer.processEntity(fernObject);
-            }
+      //      for(Entity grassObject:grass){
+     //           renderer.processEntity(grassObject);
+     //       }
+         //  for(Entity fernObject:fern){
+       //         renderer.processEntity(fernObject);
+      //      }
             for(Entity lowPolyTreeObject:lowPolyTree){
                 renderer.processEntity(lowPolyTreeObject);
             }
 
-
-
             renderer.render(light,camera);
+            guiRenderer.render(guis);
+
             DisplayManager.updateDisplay();
         }
+        guiRenderer.cleanUP();
         Audio.cleanUp();
         renderer.cleanUP();
         loader.cleanUP();
