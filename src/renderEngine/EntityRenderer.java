@@ -16,13 +16,13 @@ public class EntityRenderer {
 
 
 
-    private StaticShader shader;
+    public static StaticShader shader;
 
     // called once every frame to prepare opengl to render
 
 
     public EntityRenderer(StaticShader shader,Matrix4f projectionMatrix){
-        this.shader = shader;
+        EntityRenderer.shader = shader;
         shader.start();
         shader.loadProjectionMatrix(projectionMatrix);
         shader.stop();

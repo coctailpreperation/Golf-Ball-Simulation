@@ -3,9 +3,12 @@ package entities;
 import Models.TexturedModel;
 import engineTester.audio.Audio;
 import engineTester.audio.State;
+import inputManagement.InputManager;
+import inputManagement.InputState;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
+import org.xml.sax.InputSource;
 
 public class Player extends Entity {
 
@@ -25,16 +28,18 @@ public class Player extends Entity {
     }
 
     Vector3f fTotal = new Vector3f(0, 0, 0); // Total Force
+    InputSource inputSource;
     Vector3f v = new Vector3f(0, 0, 0);
     float ballM = 0.04593f; // Ball Weight
     float ballRadius = 0.2f;
     //float clubM; // Club Weight
+    float gravity = 10;
     Vector3f fShot = new Vector3f(0,0,0); // Newton
     Vector3f fGravity = new Vector3f(0, 0, 0);
     Vector3f a = new Vector3f(0,0,0);
     float dt = 0;
-    float launchDelta1 = 0;
-    float launchDelta2 = 0;
+    float verticalAngle = 0;
+    float horizontalAngle = 0;
     float currentTime,previousTime = 0;
     float p = 0.5f;
     Vector3f previousShot = new Vector3f(0,0,0);
@@ -44,118 +49,134 @@ public class Player extends Entity {
     float dx,dy,dz;
     Vector3f w = new Vector3f(0,0,0);
     Vector3f u = new Vector3f(0,0,0);
+    boolean finished = false;
+    float fShotValue = 1000;
+    float maximumHeight = 0;
 
     public void move() {
 
-        if(v.x ==0 && v.y==0 && v.z ==0) {
-           launchDelta2 = Camera.angleAroundPlayer - 90;
-        }
-        System.out.println(v.y);
-
-        checkInputs();
-
-        if (isInTheAir) {
-            fGravity.y = 10;
+        if(Keyboard.isKeyDown(Keyboard.KEY_R) && (currentTime-previousTime) > 1){
+            reset();
         }
 
-        dt = 0.04f;
+       // if(Math.abs(getPosition().x % 400) <= 10 && Math.abs(getPosition().z % 400) <= 10 && Math.abs(getPosition().y) <= basePosition.y) {
+      //
+     //   }
 
-        currentTime = Sys.getTime()*1.0f/Sys.getTimerResolution();
+            if(Math.abs(getPosition().x % 500) <= 10 && Math.abs(getPosition().z % 500) <= 10 && getPosition().y == basePosition.y){
+            getPosition().y = -1f;
+            finished = true;
+        }
 
-        FD.x = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.x, 2)));
-        FD.y = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.y, 2)));
-        FD.z = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.z, 2)));
-
-
-        if(!isInTheAir) {
-            fFriction.z = u.z * ballM * 10 * kFriction;
-
-            if(v.z < 0) {
-                v.z = 0;
-                fFriction.z = 0;
+        else if(!finished){
+            if (v.x == 0 && v.y == 0 && v.z == 0) {
+                horizontalAngle = Camera.angleAroundPlayer - 90;
             }
-            if(v.z ==0)
-                fFriction.z = 0;
 
-        }
-        else fFriction.z = 0;
+            checkInputs();
 
-
-        if(!isInTheAir){
-
-            fFriction.x = u.x * ballM * 10 * kFriction;
-
-            if(v.x < 0) {
-                v.x = 0;
-                fFriction.x = 0;
+            if (isInTheAir) {
+                fGravity.y = gravity;
             }
-            if(v.x == 0)
-                fFriction.x = 0;
+
+            dt = 0.04f;
+
+            currentTime = Sys.getTime() * 1.0f / Sys.getTimerResolution();
+
+            FD.x = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.x, 2)));
+            FD.y = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.y, 2)));
+            FD.z = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.z, 2)));
 
 
-        }
-        else fFriction.x = 0;
+            if (!isInTheAir) {
+                fFriction.z = u.z * ballM * gravity * kFriction;
 
-        if(v.x < 0)
-            u.x = -1;
-        else u.x = 1;
+                if (v.z < 0) {
+                    v.z = 0;
+                    fFriction.z = 0;
+                }
+                if (v.z == 0)
+                    fFriction.z = 0;
 
-        if(v.z < 0)
-            u.z = -1;
-        else u.z = 1;
-
-
-
-        fTotal.x = fShot.x - FD.x - fFriction.x;
-        fTotal.y = fShot.y - ballM * fGravity.y - FD.y;
-        fTotal.z = fShot.z - FD.z - fFriction.z;
-
-        fShot.x = 0;
-        fShot.y = 0;
-        fShot.z = 0;
-
-        a.x = fTotal.x / ballM;
-        a.y = fTotal.y / ballM;
-        a.z = fTotal.z / ballM;
-
-        v.x += a.x * dt;
-        v.y += a.y * dt;
-        v.z += a.z * dt;
-
-        if(v.x == 0 && v.z ==0 && launchDelta1 ==0)
-            v.y = 0;
+            } else fFriction.z = 0;
 
 
-        System.out.println(v.x);
-        System.out.println(v.z);
+            if (!isInTheAir) {
 
-        dx = (float) (v.x * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.sin(Math.toRadians(launchDelta2)));
-        dy = (float) (v.y * dt * Math.sin(Math.toRadians(launchDelta1)));
-        dz = (float) (v.z * dt * Math.cos(Math.toRadians(launchDelta1)) * Math.cos(Math.toRadians(launchDelta2)));
+                fFriction.x = u.x * ballM * gravity * kFriction;
 
-        w.x = dz / dt * ballRadius;
-        w.z = dx / dt * ballRadius;
+                if (v.x < 0) {
+                    v.x = 0;
+                    fFriction.x = 0;
+                }
+                if (v.x == 0)
+                    fFriction.x = 0;
 
-        super.increasePosition(dx, dy, dz);
-        super.increaseRotation(w.x,0,w.z);
 
-        if(super.getPosition().y < TERRAIN_HEIGHT + basePosition.y){
+            } else fFriction.x = 0;
 
-            super.getPosition().y = TERRAIN_HEIGHT + basePosition.y;
+            if (v.x < 0)
+                u.x = -1;
+            else u.x = 1;
 
-            fGravity.y = 0;
-            v.y = 0;
+            if (v.z < 0)
+                u.z = -1;
+            else u.z = 1;
+
+
+            fTotal.x = fShot.x - FD.x - fFriction.x;
+            fTotal.y = fShot.y - ballM * fGravity.y - FD.y;
+            fTotal.z = fShot.z - FD.z - fFriction.z;
+
+            fShot.x = 0;
             fShot.y = 0;
-            fShot.y = previousShot.y * p;
-            previousShot.y = fShot.y;
+            fShot.z = 0;
 
-            if(fShot.y < 10) {
-                fShot.y = 0;
-                previousShot.y = 0;
+            a.x = fTotal.x / ballM;
+            a.y = fTotal.y / ballM;
+            a.z = fTotal.z / ballM;
+
+            v.x += a.x * dt;
+            v.y += a.y * dt;
+            v.z += a.z * dt;
+
+            if (v.x == 0 && v.z == 0 && verticalAngle == 0)
+                v.y = 0;
+
+                if(Math.abs(v.y) - Math.abs(v.y + a.y) < 0)
+                    maximumHeight = v.y;
+                System.out.println(maximumHeight);
+
+
+            dx = (float) (v.x * dt * Math.cos(Math.toRadians(verticalAngle)) * Math.sin(Math.toRadians(horizontalAngle)));
+            dy = (float) (v.y * dt * Math.sin(Math.toRadians(verticalAngle)));
+            dz = (float) (v.z * dt * Math.cos(Math.toRadians(verticalAngle)) * Math.cos(Math.toRadians(horizontalAngle)));
+
+            w.x = dz / dt * ballRadius;
+            w.z = dx / dt * ballRadius;
+
+            super.increasePosition(dx, dy, dz);
+            super.increaseRotation(w.x, 0, w.z);
+
+
+            if (super.getPosition().y < TERRAIN_HEIGHT + basePosition.y) {
+
+
+                super.getPosition().y = TERRAIN_HEIGHT + basePosition.y;
+
                 fGravity.y = 0;
-                isInTheAir = false;
+                v.y = 0;
+                fShot.y = 0;
+                fShot.y = previousShot.y * p;
+                previousShot.y = fShot.y;
+
+                if (fShot.y < 10) {
+                    fShot.y = 0;
+                    previousShot.y = 0;
+                    fGravity.y = 0;
+                    isInTheAir = false;
+                } else isInTheAir = true;
             }
-            else isInTheAir = true;
         }
 
     }
@@ -164,17 +185,61 @@ public class Player extends Entity {
     private void checkInputs() {
         if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && v.x == 0 && v.y == 0 && v.z ==0){
             Audio.play(State.ballhit);
-            if(launchDelta1 != 0)
+            if(verticalAngle != 0)
             isInTheAir = true;
-            previousShot.x = fShot.x = 1000 / (dt * 100);
-            previousShot.y = fShot.y = 1000 / (dt * 100);
-            previousShot.z = fShot.z = 1000 / (dt * 100);
-          //  String x= JOptionPane.showInputDialog("Enter A Value");
-          //  int value=Integer.parseInt(x);
-          //  fGravity.y = value;
+            previousShot.x = fShot.x = fShotValue / (dt * 100);
+            previousShot.y = fShot.y = fShotValue / (dt * 100);
+            previousShot.z = fShot.z = fShotValue / (dt * 100);
 
         }
-        if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime-previousTime) > 0.5) {
+
+        if(Keyboard.isKeyDown(Keyboard.KEY_M) && InputManager.getInputState() != InputState.MassPending){
+            if(InputManager.getThread() != null)
+                synchronized (InputManager.getThread()) {
+                    InputManager.getThread().notify();
+                }
+            InputManager.setInputState(InputState.MassPending);
+
+        }
+
+        if(Keyboard.isKeyDown(Keyboard.KEY_G) && InputManager.getInputState() != InputState.GravityPending){
+            if(InputManager.getThread() != null)
+                synchronized (InputManager.getThread()) {
+                    InputManager.getThread().notify();
+                }
+            InputManager.setInputState(InputState.GravityPending);
+        }
+
+        if(Keyboard.isKeyDown(Keyboard.KEY_F) && InputManager.getInputState() != InputState.ForcePending){
+            if(InputManager.getThread() != null)
+                synchronized (InputManager.getThread()) {
+                    InputManager.getThread().notify();
+                }
+            InputManager.setInputState(InputState.ForcePending);
+        }
+
+        if(Keyboard.isKeyDown(Keyboard.KEY_A) && InputManager.getInputState() != InputState.AnglePending){
+            if(InputManager.getThread() != null)
+                synchronized (InputManager.getThread()) {
+                    InputManager.getThread().notify();
+                }
+            InputManager.setInputState(InputState.AnglePending);
+        }
+
+        if(InputManager.getInputState() == InputState.Gravity)
+            gravity = InputManager.getValue();
+
+        if(InputManager.getInputState() == InputState.Mass)
+            ballM = InputManager.getValue();
+
+        if(InputManager.getInputState() == InputState.Force)
+            fShotValue = InputManager.getValue();
+
+        if(InputManager.getInputState() == InputState.Angle)
+            verticalAngle = InputManager.getValue();
+
+
+        if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime - previousTime) > 0.5) {
             increaseDelta1();
 
         }
@@ -182,9 +247,7 @@ public class Player extends Entity {
             decreaseDelta1();
         }
 
-        if(Keyboard.isKeyDown(Keyboard.KEY_R) && (currentTime-previousTime) > 1){
-            reset();
-        }
+
     }
     private void reset(){
         previousTime = currentTime;
@@ -200,6 +263,7 @@ public class Player extends Entity {
         a.y = 0;
         a.z = 0;
         isInTheAir = false;
+        finished = false;
         fGravity.y = 0;
         fTotal.x = 0;
         fTotal.y = 0;
@@ -215,13 +279,13 @@ public class Player extends Entity {
         fFriction.z = 0;
     }
     private void increaseDelta1(){
-        launchDelta1 += 5;
-        System.out.println("Delta 1 = " + launchDelta1);
+        verticalAngle += 5;
+        System.out.println("Delta 1 = " + verticalAngle);
         previousTime = currentTime;
     }
     private void decreaseDelta1(){
-        launchDelta1 -= 5;
-        System.out.println("Delta 1 = " + launchDelta1);
+        verticalAngle -= 5;
+        System.out.println("Delta 1 = " + verticalAngle);
         previousTime = currentTime;
     }
 

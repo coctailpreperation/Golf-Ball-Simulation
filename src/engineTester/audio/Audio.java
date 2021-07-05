@@ -17,7 +17,7 @@ public class Audio {
         for(int i=0;i<2;i++)
             sources[i] = new Source();
 
-        sources[0].setVolume(0.05f);
+        sources[0].setVolume(0.4f);
         sources[0].setLooping(true);
         sources[1].setLooping(false);
     }
