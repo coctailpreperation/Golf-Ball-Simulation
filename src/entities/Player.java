@@ -46,7 +46,7 @@ public class Player extends Entity {
     float verticalHitAngle = 45;
     float horizontalHitAngle = 30;
     float currentTime,previousTime = 0;
-    float p = 0.8f;
+    float p = 0.5f;
     Vector3f FD = new Vector3f(0,0,0);
     Vector3f FF = new Vector3f(0,0,0);
     float gravity = 10;
@@ -60,40 +60,45 @@ public class Player extends Entity {
     }
 
     public void move() {
+        horizontalHitAngle =  Camera.angleAroundPlayer - 90;
+
         checkInputs();
 
-        horizontalHitAngle = Camera.angleAroundPlayer - 90;
 
-        dt = 0.01f;
+
+        dt = 0.04f;
 
         currentTime = Sys.getTime()*10f/Sys.getTimerResolution();
 
 
         W.x = gravity * ballM * (float) Math.cos(Math.toRadians(90));
+        if(isInTheAir)
         W.y = gravity * ballM * (float) Math.sin(Math.toRadians(90));
+        else W.y = 0;
         W.z = gravity * ballM * (float) Math.cos(Math.toRadians(90));
 
-        FD.x = 0.5f * 0.47f * 1.2f * 0.0004f * (float) Math.pow(v.x , 2)
+        FD.x = 0.5f * 0.47f * 1.2f * 0.000005f * (float) Math.pow(v.x , 2)
                 * (float) Math.cos(Math.toRadians(verticalAngle)) * (float) Math.sin(Math.toRadians(horizontalAngle + 90));
-
-
-
-        FD.y = 0.5f * 0.47f * 1.2f * 0.00009f * (float) Math.pow(v.y , 2)
+        FD.y = 0.5f * 0.47f * 1.2f * 0.000005f * (float) Math.pow(v.y , 2)
                 * (float) Math.sin(Math.toRadians(verticalAngle));
-        FD.z = 0.5f * 0.47f * 1.2f * 0.00009f * (float) Math.pow(v.z , 2)
+        FD.z = 0.5f * 0.47f * 1.2f * 0.000005f * (float) Math.pow(v.z , 2)
                 * (float) Math.cos(Math.toRadians(verticalAngle)) * (float) Math.cos(Math.toRadians(horizontalAngle + 90));
 
         if(!isInTheAir) {
             FF.z = U.z * ballM * gravity * 0.4f * (float) Math.cos(Math.toRadians(0));
-            if(v.z < 0)
+            if(v.z < 0) {
+                v.z = 0;
                 FF.z = 0;
+            }
         }
         else FF.z = 0;
 
         if(!isInTheAir) {
             FF.x = U.x * ballM * gravity * 0.4f * (float) Math.cos(Math.toRadians(0));
-            if(v.x < 0)
+            if(v.x < 0) {
+                v.x = 0;
                 FF.x = 0;
+            }
         }
         else FF.x = 0;
 
@@ -145,13 +150,8 @@ public class Player extends Entity {
         super.increaseRotation(0.5f,0,0);
 
         if(super.getPosition().getY() < TERRAIN_HEIGHT + basePosition.y){
-            fGravity.y = 0;
             super.getPosition().y = TERRAIN_HEIGHT + basePosition.y;
             isInTheAir = false;
-
-        }
-        if (isInTheAir) {
-            fGravity.y = 10;
         }
     }
 
@@ -161,9 +161,9 @@ public class Player extends Entity {
             System.out.println("SHOT");
             isInTheAir = true;
             isShot = true;
-            fShot.x = (float) (400 * Math.cos(Math.toRadians(verticalHitAngle)) * Math.sin(Math.toRadians(verticalHitAngle)));
-            fShot.y = (float) (400 * Math.sin(Math.toRadians(verticalHitAngle)));
-            fShot.z = (float) (400 * Math.cos(Math.toRadians(verticalHitAngle)) * Math.cos(Math.toRadians(horizontalHitAngle)));
+            fShot.x = (float) (400 * Math.cos(Math.toRadians(verticalHitAngle)) * Math.sin(Math.toRadians(verticalHitAngle))) / (dt * 100);
+            fShot.y = (float) (400 * Math.sin(Math.toRadians(verticalHitAngle))) / (dt * 100);
+            fShot.z = (float) (400 * Math.cos(Math.toRadians(verticalHitAngle)) * Math.cos(Math.toRadians(horizontalHitAngle))) / (dt * 100);
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime-previousTime) > 1) {
             increaseAngle();
