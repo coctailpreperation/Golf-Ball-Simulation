@@ -52,6 +52,7 @@ public class Player extends Entity {
     boolean finished = false;
     float fShotValue = 1000;
     float maximumHeight = 0;
+    boolean once = true;
 
     public void move() {
 
@@ -136,6 +137,11 @@ public class Player extends Entity {
             a.y = fTotal.y / ballM;
             a.z = fTotal.z / ballM;
 
+                if(a.y < 0 && once) {
+                    maximumHeight = v.y;
+                    once = false;
+                }
+
             v.x += a.x * dt;
             v.y += a.y * dt;
             v.z += a.z * dt;
@@ -143,9 +149,7 @@ public class Player extends Entity {
             if (v.x == 0 && v.z == 0 && verticalAngle == 0)
                 v.y = 0;
 
-                if(Math.abs(v.y) - Math.abs(v.y + a.y) < 0)
-                    maximumHeight = v.y;
-                System.out.println(maximumHeight);
+
 
 
             dx = (float) (v.x * dt * Math.cos(Math.toRadians(verticalAngle)) * Math.sin(Math.toRadians(horizontalAngle)));
