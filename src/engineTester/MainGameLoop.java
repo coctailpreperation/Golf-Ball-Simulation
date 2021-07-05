@@ -37,7 +37,7 @@ public class MainGameLoop {
         ModelData bodyData = OBJFileLoader.loadOBJ( "/ball");
         RawModel bodyRawModel = loader.loadToVAO(bodyData.getVertices(),bodyData.getTextureCoords(),bodyData.getNormals(),bodyData.getIndices());
         TexturedModel bodyModel= new TexturedModel(bodyRawModel,new ModelTexture(loader.loadTexture("/ball")).setHasTransparency(false).setShineDamper(100).setReflectivity(1));
-        Player golfBall = new Player(bodyModel,new Vector3f(300,1,300),1,0,0,0);
+        Player golfBall = new Player(bodyModel,new Vector3f(5000,1,5000),1,0,0,0);
 
 
 
@@ -72,26 +72,19 @@ public class MainGameLoop {
    //         fern[i] = new Entity(fernTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),1,0,0,0);
    //     }
 
-        Light light = new Light(new Vector3f(0,2000,0), new Vector3f(1,1,1));
+        Light light = new Light(new Vector3f(0,1000000,0), new Vector3f(1,1,1));
 
 
 
         TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
-        TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("/terrain/dirt"));
-        TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("/terrain/mud"));
-        TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("/terrain/path"));
+        TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
+        TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
+        TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
         TerrainTexturePack texturePack = new TerrainTexturePack(backgroundTexture,rTexture,gTexture,bTexture);
 
         TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("/terrain/blendMap"));
 
-        ArrayList<Terrain> terrains = new ArrayList<>();
-
-       // for(int j = 0 ; j < 2 ; j++)
-        for(int i = -2 ; i < 1 ; i ++){
-
-    Terrain terrain1 = new Terrain(i,0,loader,texturePack,blendMap,"/terrain/heightMap");
-                terrains.add(terrain1);
-        }
+        Terrain terrain = new Terrain(0,0,loader,texturePack,blendMap,"/terrain/heightMap");
 
 
         Camera camera = new Camera(golfBall);
@@ -114,7 +107,6 @@ public class MainGameLoop {
 
 
 
-            for(Terrain terrain : terrains)
                 renderer.processTerrain(terrain);
 
             renderer.processEntity(golfBall);
