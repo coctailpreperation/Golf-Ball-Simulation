@@ -110,7 +110,7 @@ public class Player extends Entity {
                 fGravity.y = gravity;
             }
 
-            dt = 0.04f;
+            dt = 0.06f;
 
             currentTime = Sys.getTime() * 1.0f / Sys.getTimerResolution(); // 1000
 
