@@ -1,4 +1,4 @@
-package inputManagement;
+package gui;
 
 public enum InputState {
     initialized, Mass, MassPending,

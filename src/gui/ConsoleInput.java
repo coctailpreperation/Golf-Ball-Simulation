@@ -1,4 +1,4 @@
-package inputManagement;
+package gui;
 
 import java.util.Scanner;
 

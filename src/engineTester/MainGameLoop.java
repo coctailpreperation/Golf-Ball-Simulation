@@ -7,14 +7,10 @@ import Textures.TerrainTexturePack;
 import engineTester.audio.Audio;
 import engineTester.audio.State;
 import entities.*;
-import guis.GuiRenderer;
-import guis.GuiTexture;
-import inputManagement.ConsoleInput;
-import inputManagement.GUI;
+import gui.GUI;
 import objConverter.ModelData;
 import objConverter.OBJFileLoader;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
@@ -23,8 +19,6 @@ import renderEngine.MasterRenderer;
 import terrains.Terrain;
 
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class MainGameLoop {
@@ -75,12 +69,12 @@ public class MainGameLoop {
         //     }
         for(int j = 0 ; j < 20 ; j++)
         for (int i = 0; i < 20; i++) {
-            lowPolyTree[treesNumber++] = new Entity(lowPolyTreeTexturedModel, new Vector3f(i*400, 0, j*400), 0.5f, 0, 0, 0);
+            lowPolyTree[treesNumber++] = new Entity(lowPolyTreeTexturedModel, new Vector3f(i*400 + 3, 0, j*400 + 3), 0.5f, 0, 0, 0);
         }
 
         for (int i = 0; i < 20; i++)
             for(int j = 0 ; j < 20 ; j++)
-                hole[holesNumber++] = new Entity(holeTextured, new Vector3f(i * 500, 0.001f, j * 500), 4, 0, 0, 0);
+                hole[holesNumber++] = new Entity(holeTextured, new Vector3f(i * 500 + 5, 0.001f, j * 500 + 5), 4, 0, 0, 0);
 
 
 
@@ -108,11 +102,10 @@ public class MainGameLoop {
 
         Audio.play(State.background);
 
-        GuiRenderer guiRenderer = new GuiRenderer(loader);
-        List<GuiTexture> guis = new ArrayList<>();
+      //  GuiRenderer guiRenderer = new GuiRenderer(loader);
+   //     List<GuiTexture> guis = new ArrayList<>();
     //    GuiTexture guiTexture = new GuiTexture(loader.loadTexture("ball"), new Vector2f(0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
     //    guis.add(guiTexture);
-
         new GUI();
 
         while (!Display.isCloseRequested()) {
@@ -139,11 +132,11 @@ public class MainGameLoop {
             }
 
             renderer.render(light, camera);
-            guiRenderer.render(guis);
+    //        guiRenderer.render(guis);
 
             DisplayManager.updateDisplay();
         }
-        guiRenderer.cleanUP();
+   //     guiRenderer.cleanUP();
         Audio.cleanUp();
         renderer.cleanUP();
         loader.cleanUP();

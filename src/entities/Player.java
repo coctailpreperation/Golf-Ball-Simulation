@@ -3,17 +3,14 @@ package entities;
 import Models.TexturedModel;
 import engineTester.audio.Audio;
 import engineTester.audio.State;
-import inputManagement.InputManager;
-import inputManagement.InputState;
+import gui.InputManager;
+import gui.InputState;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
-import org.xml.sax.InputSource;
 
 public class Player extends Entity {
 
-
-    private float baseRotY = 0;
     private Vector3f basePosition = new Vector3f(0, 0, 0);
 
     private static final float TERRAIN_HEIGHT = 0;
@@ -28,7 +25,6 @@ public class Player extends Entity {
     }
 
     Vector3f fTotal = new Vector3f(0, 0, 0); // Total Force
-    InputSource inputSource;
     Vector3f v = new Vector3f(0, 0, 0);
     float ballM = 0.04593f; // Ball Weight
     float ballRadius = 0.2f;
@@ -51,9 +47,14 @@ public class Player extends Entity {
     Vector3f u = new Vector3f(0,0,0);
     boolean finished = false;
     float fShotValue = 1000;
-    float maximumHeight = 0;
-    boolean once = true;
+    boolean angleIsInversed = false;
+    boolean treeInversed = false;
     int score = 0;
+    float reboundAngle = 0;
+    float cd = 0.47f;
+    float A = 0.0004338f;
+    float ro = 1.184f;
+
 
     public void move() {
 
@@ -61,20 +62,47 @@ public class Player extends Entity {
             reset();
         }
 
-       // if(Math.abs(getPosition().x % 400) <= 10 && Math.abs(getPosition().z % 400) <= 10 && Math.abs(getPosition().y) <= basePosition.y) {
-      //
-     //   }
+        if(Math.abs(getPosition().x % 400) <= 7 && Math.abs(getPosition().z % 400) <= 7 && Math.abs(getPosition().y) <= 12) {
+
+            float v1x = ((ballM - 10f) / (ballM + 10f)) * v.x;
+
+            float v1z = ((ballM - 10f) / (ballM + 10f)) * v.z;
+            v.x = Math.abs(v1x);
+            v.z = Math.abs(v1z);
+
+            System.out.println(verticalAngle);
+            if(v.x - v1x > 0 && !treeInversed) {
+                reboundAngle = 180;
+                treeInversed = true;//
+            }
+            System.out.println(verticalAngle);
+
+
+
+
+        }
+
 
             if(Math.abs(getPosition().x % 500) <= 10 && Math.abs(getPosition().z % 500) <= 10 && getPosition().y == basePosition.y){
             getPosition().y = -1f;
             finished = true;
             score++;
+                System.out.println(score);
         }
 
         else if(!finished){
+
             if (v.x == 0 && v.y == 0 && v.z == 0) {
                 horizontalAngle = Camera.angleAroundPlayer - 90;
+                if(treeInversed){
+                    treeInversed = false;//
+                    reboundAngle = 0;
+                }
             }
+
+//                System.out.println(v.x);
+//                System.out.println(v.y);
+//                System.out.println(v.z);
 
             checkInputs();
 
@@ -84,11 +112,11 @@ public class Player extends Entity {
 
             dt = 0.04f;
 
-            currentTime = Sys.getTime() * 1.0f / Sys.getTimerResolution();
+            currentTime = Sys.getTime() * 1.0f / Sys.getTimerResolution(); // 1000
 
-            FD.x = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.x, 2)));
-            FD.y = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.y, 2)));
-            FD.z = (float) ((0.5 * 0.47 * 0.0004338 * 1.184f * Math.pow(v.z, 2)));
+            FD.x = (float) ((0.5 * cd * A * ro * Math.pow(v.x, 2)));
+            FD.y = (float) ((0.5 * cd * A * ro * Math.pow(v.y, 2)));
+            FD.z = (float) ((0.5 * cd * A * ro * Math.pow(v.z, 2)));
 
 
             if (!isInTheAir) {
@@ -145,15 +173,15 @@ public class Player extends Entity {
             v.y += a.y * dt;
             v.z += a.z * dt;
 
-            if (v.x == 0 && v.z == 0 && verticalAngle == 0)
+            if (v.x == 0 && v.z == 0 && (verticalAngle % 180) == 0)
                 v.y = 0;
 
 
 
 
-            dx = (float) (v.x * dt * Math.cos(Math.toRadians(verticalAngle)) * Math.sin(Math.toRadians(horizontalAngle)));
+            dx = (float) (v.x * dt * Math.cos(Math.toRadians(verticalAngle + reboundAngle)) * Math.sin(Math.toRadians(horizontalAngle)));
             dy = (float) (v.y * dt * Math.sin(Math.toRadians(verticalAngle)));
-            dz = (float) (v.z * dt * Math.cos(Math.toRadians(verticalAngle)) * Math.cos(Math.toRadians(horizontalAngle)));
+            dz = (float) (v.z * dt * Math.cos(Math.toRadians(verticalAngle + reboundAngle)) * Math.cos(Math.toRadians(horizontalAngle)));
 
 
             w.x = dz / dt * ballRadius;
@@ -165,12 +193,10 @@ public class Player extends Entity {
 
             if (super.getPosition().y < TERRAIN_HEIGHT + basePosition.y) {
 
-                System.out.println(verticalAngle);
-                if(verticalAngle < 0 && once) {
+                if(verticalAngle < 0 && !angleIsInversed) {
                     verticalAngle += 180;
-                    once = false;
+                    angleIsInversed = true; //
                 }
-                System.out.println(verticalAngle);
 
                 super.getPosition().y = TERRAIN_HEIGHT + basePosition.y;
 
@@ -198,6 +224,9 @@ public class Player extends Entity {
             Audio.play(State.ballhit);
             if(verticalAngle != 0)
             isInTheAir = true;
+            reboundAngle = 0;
+            angleIsInversed = false;
+            treeInversed = false;
             previousShot.x = fShot.x = fShotValue / (dt * 100);
             previousShot.y = fShot.y = fShotValue / (dt * 100);
             previousShot.z = fShot.z = fShotValue / (dt * 100);
@@ -257,16 +286,6 @@ public class Player extends Entity {
             InputManager.setInputState(InputState.None);
         }
 
-
-        if(Keyboard.isKeyDown(Keyboard.KEY_UP) && (currentTime - previousTime) > 0.5) {
-            increaseDelta1();
-
-        }
-        if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && (currentTime-previousTime) > 0.5) {
-            decreaseDelta1();
-        }
-
-
     }
     private void reset(){
         previousTime = currentTime;
@@ -281,6 +300,8 @@ public class Player extends Entity {
         a.x = 0;
         a.y = 0;
         a.z = 0;
+        treeInversed = false;
+        angleIsInversed = false;
         isInTheAir = false;
         finished = false;
         fGravity.y = 0;
@@ -296,16 +317,6 @@ public class Player extends Entity {
         fFriction.x = 0;
         fFriction.y = 0;
         fFriction.z = 0;
-    }
-    private void increaseDelta1(){
-        verticalAngle += 5;
-        System.out.println("Delta 1 = " + verticalAngle);
-        previousTime = currentTime;
-    }
-    private void decreaseDelta1(){
-        verticalAngle -= 5;
-        System.out.println("Delta 1 = " + verticalAngle);
-        previousTime = currentTime;
     }
 
 }
