@@ -24,7 +24,7 @@
 Only to be used for educational purposes.
 I am not responsible for any copyright infringement you might incounter in any way, shape or form.
 
-***Special Thanks for: [ThinkMatrix](https://www.youtube.com/user/ThinMatrix)*** <br>
+***Special Thanks for: [ThinMatrix](https://www.youtube.com/user/ThinMatrix)*** <br>
 ***3D Models From: [Sketchfab](https://sketchfab.com/)***
 
 Copyright © 2012-present Lightweight Java Game Library
