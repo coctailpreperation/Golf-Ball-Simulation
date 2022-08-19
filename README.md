@@ -1,14 +1,11 @@
 **Getting Started**
-1. Download [*LWJGL 2.91*](https://sourceforge.net/projects/java-game-lib/files/Official%20Releases/LWJGL%202.9.1/lwjgl-2.9.1.zip/download)
-2. Download [*SLICK-UTILS*](http://slick.ninjacave.com/slick-util.jar)
-3. Create lib folder to place your libraries resources.
-4. Create both jars and native folders.
-5. Unzip lwjgl-2.9.1.zip.
-6. Navigate to jars folder and copy lwjgl.jar and lwjgl-utils.jar then place them inside your jars folder.
-7. Navigate to native folder and open the relevant folder for your operating system and copy the contents then place them inside your native folder.
-8. Put the utils jar into your jars folder.
-9. Add libraries using your IDE of choice, for intellij follow this guide: [Define Library](https://www.jetbrains.com/help/idea/library.html#define-library)
-10. Run.
+1. Clone.
+2. Run.
+
+**Requirements**
+- JDK >= 14
+- IntelliJ "Community or Ultimate Version", You can use your own Java IDE but remember to import the jars and native libraries.
+- Windows > 7, For Other Operating System Users You can download your operating system relevant native libraries from [*LWJGL 2.91*](https://sourceforge.net/projects/java-game-lib/files/Official%20Releases/LWJGL%202.9.1/lwjgl-2.9.1.zip/download) Just extract, navigate to native folder and open your the folder relevant to your operating system replace the contents on the lib/native with your specific native files.
 
 **Controls**
 - Keyboard
