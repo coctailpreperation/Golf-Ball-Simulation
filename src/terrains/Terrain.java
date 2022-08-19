@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class Terrain {
 
-    private static final float SIZE = 800;
+    private static final float SIZE = 10000;
     private static final float MAX_HEIGHT = 60;
     private static final float MAX_PIXEL_COLOUR = 256 * 256 * 256; // R G B Between 0,255
     private float x;
@@ -45,7 +45,7 @@ public class Terrain {
 
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File("E:/Projects/LWJGL/Scientific Calculations/res/" + heightMap + ".png"));
+            image = ImageIO.read(new File("res/" + heightMap + ".png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

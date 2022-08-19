@@ -5,7 +5,9 @@ import Textures.ModelTexture;
 import Textures.TerrainTexture;
 import Textures.TerrainTexturePack;
 import engineTester.audio.Audio;
+import engineTester.audio.State;
 import entities.*;
+import gui.GUI;
 import objConverter.ModelData;
 import objConverter.OBJFileLoader;
 import org.lwjgl.opengl.Display;
@@ -16,133 +18,126 @@ import Models.RawModel;
 import renderEngine.MasterRenderer;
 import terrains.Terrain;
 
-import java.util.ArrayList;
+
 import java.util.Random;
 
 public class MainGameLoop {
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
+        Audio.run();
 
 
         DisplayManager.createDisplay();
         Loader loader = new Loader();
 
 
+        ModelData bodyData = OBJFileLoader.loadOBJ("/ball");
+        RawModel bodyRawModel = loader.loadToVAO(bodyData.getVertices(), bodyData.getTextureCoords(), bodyData.getNormals(), bodyData.getIndices());
+        TexturedModel bodyModel = new TexturedModel(bodyRawModel, new ModelTexture(loader.loadTexture("/ball")).setHasTransparency(false).setShineDamper(100).setReflectivity(1));
+        Player golfBall = new Player(bodyModel, new Vector3f(5100, 1, 5100), 1, 0, 0, 0);
 
-
-
-
-
-        //OpenGL expect Vertices to be defined counter clockwise by default
-
-
-      /*  ModelData wheelData = OBJFileLoader.loadOBJ( "/res/ball");
-        RawModel rawWheelData = loader.loadToVAO(wheelData.getVertices(),wheelData.getTextureCoords(),wheelData.getNormals(),wheelData.getIndices());
-        TexturedModel wheelModel= new TexturedModel(rawWheelData,new ModelTexture(loader.loadTexture("/res/ball")).setHasTransparency(false).setShineDamper(100).setReflectivity(1));
-        MovingObject[] wheel = new MovingObject[4];
-        wheel[0] = new MovingObject(wheelModel,new Vector3f(3.92543f+30,1.74258f,-6.46595f+30),1.1f,0,0,0); //backLeftWheel
-        wheel[1] = new MovingObject(wheelModel,new Vector3f(-3.92543f+30,1.74258f,-6.46595f+30),1.1f,0,180,0); //backRight
-        wheel[2] = new MovingObject(wheelModel,new Vector3f(3.88814f+30,1.74258f,7.66162f+30),1.1f,0,0,0); //frontLeft
-        wheel[3] = new MovingObject(wheelModel,new Vector3f(-3.89323f+30,1.74258f,7.28157f+30),1.1f,0,180,0);//frontRight
-       */
-
-        ModelData bodyData = OBJFileLoader.loadOBJ( "/ball");
-        RawModel bodyRawModel = loader.loadToVAO(bodyData.getVertices(),bodyData.getTextureCoords(),bodyData.getNormals(),bodyData.getIndices());
-        TexturedModel bodyModel= new TexturedModel(bodyRawModel,new ModelTexture(loader.loadTexture("/ball")).setHasTransparency(false).setShineDamper(100).setReflectivity(1));
-        Player golfBall = new Player(bodyModel,new Vector3f(30,1,30),1,0,0,0);
-
+        ModelData holeData = OBJFileLoader.loadOBJ("/hole");
+        RawModel holeRaw = loader.loadToVAO(holeData.getVertices(), holeData.getTextureCoords(), holeData.getNormals(), holeData.getIndices());
+        TexturedModel holeTextured = new TexturedModel(holeRaw, new ModelTexture(loader.loadTexture("/hole")).setHasTransparency(false).setShineDamper(100).setReflectivity(1));
+        Entity[] hole = new Entity[400];
+        int holesNumber = 0;
 
 
         ModelData grassData = OBJFileLoader.loadOBJ("/environment/grass");
-        RawModel grassModel = loader.loadToVAO(grassData.getVertices(),grassData.getTextureCoords(),grassData.getNormals(),grassData.getIndices());
+        RawModel grassModel = loader.loadToVAO(grassData.getVertices(), grassData.getTextureCoords(), grassData.getNormals(), grassData.getIndices());
         ModelData fernData = OBJFileLoader.loadOBJ("/environment/fern");
-        RawModel fernModel = loader.loadToVAO(fernData.getVertices(),fernData.getTextureCoords(),fernData.getNormals(),fernData.getIndices());
+        RawModel fernModel = loader.loadToVAO(fernData.getVertices(), fernData.getTextureCoords(), fernData.getNormals(), fernData.getIndices());
         ModelData lowPolyTreeData = OBJFileLoader.loadOBJ("/environment/lowPolyTree");
-        RawModel lowPolyTreeModel = loader.loadToVAO(lowPolyTreeData.getVertices(),lowPolyTreeData.getTextureCoords(),lowPolyTreeData.getNormals(),lowPolyTreeData.getIndices());
+        RawModel lowPolyTreeModel = loader.loadToVAO(lowPolyTreeData.getVertices(), lowPolyTreeData.getTextureCoords(), lowPolyTreeData.getNormals(), lowPolyTreeData.getIndices());
 
 
-        TexturedModel fernTexturedModel = new TexturedModel(fernModel,new ModelTexture(loader.loadTexture("/environment/fern")));
-        TexturedModel grassTexturedModel = new TexturedModel(grassModel,new ModelTexture(loader.loadTexture("/environment/grass")));
-        TexturedModel lowPolyTreeTexturedModel = new TexturedModel(lowPolyTreeModel,new ModelTexture(loader.loadTexture("/environment/lowPolyTree")));
+        TexturedModel fernTexturedModel = new TexturedModel(fernModel, new ModelTexture(loader.loadTexture("/environment/fern")));
+        TexturedModel grassTexturedModel = new TexturedModel(grassModel, new ModelTexture(loader.loadTexture("/environment/grass")));
+        TexturedModel lowPolyTreeTexturedModel = new TexturedModel(lowPolyTreeModel, new ModelTexture(loader.loadTexture("/environment/lowPolyTree")));
 
         grassTexturedModel.getTexture().setHasTransparency(true);
         grassTexturedModel.getTexture().setHasFakeLighting(true);
         fernTexturedModel.getTexture().setHasTransparency(true);
-        Entity[] fern = new Entity[1000];
-        Entity[] grass = new Entity[2000];
-        Entity[] lowPolyTree = new Entity[100];
+        // Entity[] fern = new Entity[1000];
+        //      Entity[] grass = new Entity[2000];
+        Entity[] lowPolyTree = new Entity[400];
+        int treesNumber = 0;
         Random random = new Random();
-        for(int i=0;i<2000;i++){
-            grass[i] = new Entity(grassTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),1,0,0,0);
+        //     for(int i=0;i<2000;i++){
+        //         grass[i] = new Entity(grassTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),1,0,0,0);
 
-        }
-        for(int i=0;i<100;i++) {
-            lowPolyTree[i] = new Entity(lowPolyTreeTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),0.5f,0,0,0);
-        }
-
-        for(int i=0;i<1000;i++){
-            fern[i] = new Entity(fernTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),1,0,0,0);
+        //     }
+        for(int j = 0 ; j < 20 ; j++)
+        for (int i = 0; i < 20; i++) {
+            lowPolyTree[treesNumber++] = new Entity(lowPolyTreeTexturedModel, new Vector3f(i*400 + 3, 0, j*400 + 3), 0.5f, 0, 0, 0);
         }
 
-        Light light = new Light(new Vector3f(0,2000,0), new Vector3f(1,1,1));
+        for (int i = 0; i < 20; i++)
+            for(int j = 0 ; j < 20 ; j++)
+                hole[holesNumber++] = new Entity(holeTextured, new Vector3f(i * 500 + 5, 0.001f, j * 500 + 5), 4, 0, 0, 0);
 
-       /*TerrainTexture Stuff*/
 
-        TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("/terrain/ra"));
-        TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("/terrain/dirt"));
-        TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("/terrain/mud"));
-        TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("/terrain/path"));
-        TerrainTexturePack texturePack = new TerrainTexturePack(backgroundTexture,rTexture,gTexture,bTexture);
+
+        //      for(int i=0;i<1000;i++){
+            //         fern[i] = new Entity(fernTexturedModel, new Vector3f(random.nextInt(780)+10,0,random.nextInt(780)+10),1,0,0,0);
+            //     }
+
+            Light light = new Light(new Vector3f(0, 1000000, 0), new Vector3f(1, 1, 1));
+
+
+        TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
+        TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
+        TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
+        TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("/terrain/grass"));
+        TerrainTexturePack texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
 
         TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("/terrain/blendMap"));
 
-        //*****************************//
-
-        ArrayList<Terrain> terrains = new ArrayList<>();
-
-        //Terrain terrain = new Terrain(0,0,loader,texturePack,blendMap,"/terrain/heightMap");
-        //Terrain terrain1 = new Terrain(-1,-1,loader,texturePack,blendMap,"/terrain/heightMap");
-        for(int i = 0 ; i < 5 ; i ++){
-            Terrain terrain = new Terrain(0,i,loader,texturePack,blendMap,"/terrain/heightMap");
-            terrains.add(terrain);
-        }
+        Terrain terrain = new Terrain(0, 0, loader, texturePack, blendMap, "/terrain/heightMap");
 
 
         Camera camera = new Camera(golfBall);
 
         MasterRenderer renderer = new MasterRenderer();
 
+        Audio.play(State.background);
 
+      //  GuiRenderer guiRenderer = new GuiRenderer(loader);
+   //     List<GuiTexture> guis = new ArrayList<>();
+    //    GuiTexture guiTexture = new GuiTexture(loader.loadTexture("ball"), new Vector2f(0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
+    //    guis.add(guiTexture);
+        new GUI();
 
-
-        while(!Display.isCloseRequested()){
+        while (!Display.isCloseRequested()) {
 
 
             camera.move();
 
-           golfBall.move();
+            golfBall.move();
 
 
+            renderer.processTerrain(terrain);
 
-            for(Terrain terrain : terrains)
-                renderer.processTerrain(terrain);
-        //    renderer.processTerrain(terrain1);
             renderer.processEntity(golfBall);
-            for(Entity grassObject:grass){
-                renderer.processEntity(grassObject);
-            }
-           for(Entity fernObject:fern){
-                renderer.processEntity(fernObject);
-            }
-            for(Entity lowPolyTreeObject:lowPolyTree){
+            for(int i = 0 ; i < holesNumber ; i ++)
+            renderer.processEntity(hole[i]);
+            //      for(Entity grassObject:grass){
+            //           renderer.processEntity(grassObject);
+            //       }
+            //  for(Entity fernObject:fern){
+            //         renderer.processEntity(fernObject);
+            //      }
+            for (Entity lowPolyTreeObject : lowPolyTree) {
                 renderer.processEntity(lowPolyTreeObject);
             }
 
+            renderer.render(light, camera);
+    //        guiRenderer.render(guis);
 
-
-            renderer.render(light,camera);
             DisplayManager.updateDisplay();
         }
+   //     guiRenderer.cleanUP();
+        Audio.cleanUp();
         renderer.cleanUP();
         loader.cleanUP();
         DisplayManager.closeDisplay();
