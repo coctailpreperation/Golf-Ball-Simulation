@@ -5,7 +5,7 @@
 **Requirements**
 - JDK >= 14
 - IntelliJ "Community or Ultimate Version", You can use your own Java IDE but remember to import the jars and native libraries.
-- Windows > 7, For Other Operating System Users You can download your operating system relevant native libraries from [*LWJGL 2.91*](https://sourceforge.net/projects/java-game-lib/files/Official%20Releases/LWJGL%202.9.1/lwjgl-2.9.1.zip/download) Just extract, navigate to native folder and open your the folder relevant to your operating system replace the contents on the lib/native with your specific native files.
+- Windows >= 7, For Other Operating System Users You can download your operating system relevant native libraries from [*LWJGL 2.91*](https://sourceforge.net/projects/java-game-lib/files/Official%20Releases/LWJGL%202.9.1/lwjgl-2.9.1.zip/download) Just extract, navigate to native folder and open your the folder relevant to your operating system replace the contents on the lib/native with your specific native files.
 
 **Controls**
 - Keyboard
