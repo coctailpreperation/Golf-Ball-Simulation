@@ -4,3 +4,7 @@ I am not responsible for any copyright infringement you might incounter in any w
 Special Thanks for: https://www.youtube.com/user/ThinMatrix
 3D Models: 
 -ball.obj: https://sketchfab.com/vanart
+
+
+Copyright © 2012-present Lightweight Java Game Library
+All rights reserved.
